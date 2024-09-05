@@ -1,9 +1,34 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../utils/globals";
 
 function Home() {
   const [decks, setDecks] = useState([]);
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this deck?");
+    if (!confirmed) return;
+
+    console.log(id);
+    const newDecks = decks.filter(deck => { 
+        return deck.id !== id 
+    })
+
+    let message = "deck size did not change";
+    if (newDecks.length < decks.length) {
+        const response = await fetch(`${BASE_URL}/decks/${id}`, {method: 'DELETE'});
+        if (response.ok) {
+            setDecks(newDecks);
+        } else {
+            message = "API call failed"
+        }
+    } else {
+        console.log(`Something went wrong with the delete handler function! ... ${message}`);
+    }
+  }
+
+  console.log(handleDelete)
 
   useEffect(() => {
     console.log(`Updated decks: ${JSON.stringify(decks)}`);
@@ -11,7 +36,7 @@ function Home() {
 
   useEffect(() => {
     const fetchDecks = async () => {
-      const url = "http://localhost:8080/decks?_embed=cards";
+      const url = `${BASE_URL}/decks?_embed=cards`;
       console.log(`fetching decks from ${url}`);
 
       try {
@@ -49,9 +74,9 @@ function Home() {
             </div>
             <p className="card-text">{deck.description}</p>
             <div className="d-flex">
-              <button className="btn btn-primary mr-2">Study</button>
-              <button className="btn btn-success">Edit</button>
-              <button className="btn btn-danger ml-auto">Delete</button>
+              <button className="btn btn-primary mr-2" onClick={() => navigate(`/decks/${deck.id}/study`)}>Study</button>
+              <button className="btn btn-success" onClick={() => navigate(`/decks/${deck.id}/edit`)}>Edit</button>
+              <button className="btn btn-danger ml-auto" onClick={() => handleDelete(deck.id)}>Delete</button>
             </div>
           </div>
         </div>
