@@ -16,6 +16,7 @@ function EditCard() {
   }, [cardId]);
 
   const handleChange = ({ target }) => {
+    console.log('changing')
     setCard({
       ...card,
       [target.name]: target.value,
@@ -23,6 +24,7 @@ function EditCard() {
   };
 
   const handleSubmit = async (event) => {
+    console.log("off you go my son")
     event.preventDefault();
     await updateCard(card);
     navigate(`/decks/${deckId}`);

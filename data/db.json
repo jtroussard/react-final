@@ -54,6 +54,12 @@
       "back": "a drunk buck",
       "deckId": 1,
       "id": 8
+    },
+    {
+      "front": "dogs",
+      "back": "whoof",
+      "deckId": 1,
+      "id": 9
     }
   ]
 }

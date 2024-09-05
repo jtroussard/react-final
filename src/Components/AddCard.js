@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { createCard } from "../utils/api";
+import { createCard, readDeck } from "../utils/api";
 
 function AddCard() {
   const { deckId } = useParams();
@@ -9,6 +9,15 @@ function AddCard() {
     front: "",
     back: "",
   });
+  const [deck, setDeck] = useState(null);
+
+  useEffect(() => {
+    const fetchDeck = async () => {
+      const deckData = await readDeck(deckId);
+      setDeck(deckData);
+    };
+    fetchDeck();
+  }, [deckId]);
 
   const handleChange = ({ target }) => {
     setFormData({
@@ -27,18 +36,24 @@ function AddCard() {
     navigate(`/decks/${deckId}`);
   };
 
+  if (!deck) return <div>Loading...</div>;
+
   return (
     <div>
-      <h2>Add Card</h2>
+      <h1>Add Card</h1>
+      <h2>{deck.name}</h2>
+      <p>{deck.name}</p>
+      {deck.name}
+      <p>TEST RUNNER LOOK UP HERE!!!!!!! WHY DON"T YOU SEE ME!????? {deck.name}</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="front">
             Front
-            <input
+            <textarea
               className="form-control"
               id="front"
               name="front"
-              type="text"
+              rows="5"
               value={formData.front}
               onChange={handleChange}
             />

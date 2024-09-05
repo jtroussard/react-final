@@ -17,7 +17,8 @@ function Home() {
 
     let message = "deck size did not change";
     if (newDecks.length < decks.length) {
-        const response = await fetch(`${BASE_URL}/decks/${id}`, {method: 'DELETE'});
+        const baseUrl ="http://localhost:8080";
+        const response = await fetch(`${baseUrl}/decks/${id}`, {method: 'DELETE'});
         if (response.ok) {
             setDecks(newDecks);
         } else {
@@ -36,7 +37,8 @@ function Home() {
 
   useEffect(() => {
     const fetchDecks = async () => {
-      const url = `${BASE_URL}/decks?_embed=cards`;
+        const baseUrl ="http://localhost:8080";
+      const url = `${baseUrl}/decks?_embed=cards`;
       console.log(`fetching decks from ${url}`);
 
       try {
