@@ -14,10 +14,10 @@ function Study() {
     const fetchDeck = async () => {
       try {
         const response = await fetch(`http://localhost:8080/decks/${deckId}?_embed=cards`);
-        console.log("Fetching deck data for deckId:", deckId); // Debugging
+        // console.log("Fetching deck data for deckId:", deckId); 
         if (response.ok) {
           const data = await response.json();
-          console.log("Deck data fetched:", data); // Debugging
+          // console.log("Deck data fetched:", data); 
           setDeck(data);
         } else {
           console.error("Failed to fetch deck, status:", response.status);
