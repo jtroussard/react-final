@@ -1,65 +1,101 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import NotEnoughCards from "../Components/NotEnoughCards";
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { readDeck } from '../utils/api';
 
 function Study() {
+  const mountedRef = useRef(false);
+  const initialState = {
+    deck: { name: 'loading...', cards: [] },
+    isCardFlipped: false,
+    currentIndex: 0,
+  };
+
+  const [studyState, setStudyState] = useState(initialState);
+  const { deck, isCardFlipped, currentIndex } = studyState;
   const { deckId } = useParams();
-  const [deck, setDeck] = useState(null);
-  const [currentCard, setCurrentCard] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDeck = async () => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    async function loadDeck() {
       try {
-        const response = await fetch(`http://localhost:8080/decks/${deckId}?_embed=cards`);
-        // console.log("Fetching deck data for deckId:", deckId); 
-        if (response.ok) {
-          const data = await response.json();
-          // console.log("Deck data fetched:", data); 
-          setDeck(data);
-        } else {
-          console.error("Failed to fetch deck, status:", response.status);
+        const loadedDeck = await readDeck(deckId, abortController.signal);
+        if (mountedRef.current) {
+          setStudyState((currentState) => ({
+            ...currentState,
+            deck: loadedDeck,
+          }));
         }
       } catch (error) {
-        console.error("Error fetching deck:", error);
-      } finally {
-        setLoading(false);
+        if (error.name !== 'AbortError') {
+          throw error;
+        }
       }
+    }
+    loadDeck();
+    return () => {
+      abortController.abort();
     };
-
-    fetchDeck();
   }, [deckId]);
 
-  if (loading) return <div>Loading...</div>;
-
-  if (!deck) return <div>Error: Deck not found</div>;
-
-  if (deck.cards.length < 3) {
-    return <NotEnoughCards numberOfCards={deck.cards.length} deckId={deckId} />;
-  }
-
   const handleFlip = () => {
-    setIsFlipped(!isFlipped);
+    setStudyState({
+      ...studyState,
+      isCardFlipped: !isCardFlipped,
+    });
   };
 
   const handleNext = () => {
-    if (currentCard < deck.cards.length - 1) {
-      setCurrentCard(currentCard + 1);
-      setIsFlipped(false);
-    } else {
-      const confirmed = window.confirm("Would you like to restart the deck?");
+    const { cards } = deck;
+    if (currentIndex === cards.length - 1) {
+      const confirmed = window.confirm('Would you like to restart the deck?');
       if (confirmed) {
-        setCurrentCard(0);
-        setIsFlipped(false);
+        setStudyState((currentState) => ({
+          ...currentState,
+          currentIndex: 0,
+          isCardFlipped: false,
+        }));
       } else {
-        navigate("/");
+        navigate('/');
       }
+    } else {
+      setStudyState((currentState) => ({
+        ...currentState,
+        currentIndex: currentState.currentIndex + 1,
+        isCardFlipped: false,
+      }));
     }
   };
 
-  const card = deck.cards[currentCard];
+  if (deck.cards.length <= 2) {
+    return (
+      <div>
+        <h1>{deck.name}</h1>
+        <div className="card">
+          <div className="card-title">
+            <h2>Not enough cards.</h2>
+          </div>
+          <div className="card-text">
+            <p>You need at least 3 cards to study. Please add more cards to this deck.</p>
+            <Link to={`/decks/${deckId}/cards/new`}>
+              <button className="btn btn-primary">
+                <i className="fas fa-plus"></i> Add Card
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const card = deck.cards[currentIndex];
 
   return (
     <div>
@@ -68,17 +104,17 @@ function Study() {
         <div className="card">
           <div className="card-title">
             <h2>
-              Card {currentCard + 1} of {deck.cards.length}
+              Card {currentIndex + 1} of {deck.cards.length}
             </h2>
           </div>
           <div className="card-text">
-            <p>{isFlipped ? card.back : card.front}</p>
-            <button className="mr-2" onClick={handleFlip}>
+            <p>{isCardFlipped ? card.back : card.front}</p>
+            <button className="btn btn-secondary mr-2" onClick={handleFlip}>
               Flip
             </button>
-            {isFlipped && (
-              <button className="mr-2" onClick={handleNext}>
-                {currentCard === deck.cards.length - 1 ? "Restart Deck" : "Next"}
+            {isCardFlipped && (
+              <button className="btn btn-primary mr-2" onClick={handleNext}>
+                {currentIndex === deck.cards.length - 1 ? "Restart Deck" : "Next"}
               </button>
             )}
           </div>

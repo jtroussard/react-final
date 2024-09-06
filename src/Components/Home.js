@@ -1,10 +1,21 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/globals";
+import { deleteDeck, listDecks } from '../utils/api/index.js';
 
 function Home() {
+  const mountedRef = useRef(false);
   const [decks, setDecks] = useState([]);
+    const navigate = useNavigate();
+  
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Are you sure you want to delete this deck?");
@@ -18,9 +29,11 @@ function Home() {
     let message = "deck size did not change";
     if (newDecks.length < decks.length) {
         const baseUrl ="http://localhost:8080";
-        const response = await fetch(`${baseUrl}/decks/${id}`, {method: 'DELETE'});
+//         const response = await fetch(`${baseUrl}/decks/${id}`, {method: 'DELETE'});
+      const response = await deleteDeck()
         if (response.ok) {
             setDecks(newDecks);
+          navigate("/")
         } else {
             message = "API call failed"
         }
@@ -28,34 +41,28 @@ function Home() {
         console.log(`Something went wrong with the delete handler function! ... ${message}`);
     }
   }
-
-  console.log(handleDelete)
-
+  
   useEffect(() => {
     console.log(`Updated decks: ${JSON.stringify(decks)}`);
   }, [decks]);
 
-  useEffect(() => {
-    const fetchDecks = async () => {
-        const baseUrl ="http://localhost:8080";
-      const url = `${baseUrl}/decks?_embed=cards`;
-      console.log(`fetching decks from ${url}`);
-
+    useEffect(() => {
+    const abortController = new AbortController();
+    async function loadDecks() {
       try {
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setDecks(data);
-        } else {
-          console.log("API FAILED");
+        const decks = await listDecks();
+        if (mountedRef.current) {
+          setDecks((_) => [...decks]);
         }
       } catch (error) {
-        console.log(`Error making api call: ${error}`);
+        if (error.name !== 'AbortError') {
+          throw error;
+        }
       }
-    };
-    console.log(`BEFORE ${decks}`);
-    fetchDecks();
-    console.log(`HAVE we set the decks? ${JSON.stringify(decks)}`);
+    }
+    loadDecks();
+
+    return () => abortController.abort();
   }, []);
 
   const deckRenderings = () => {
@@ -86,7 +93,7 @@ function Home() {
     });
   };
 
-  const navigate = useNavigate();
+
   const goToCreateDeck = () => {
     navigate('/decks/new')
   }

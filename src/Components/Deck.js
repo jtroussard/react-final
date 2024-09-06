@@ -1,27 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { readDeck, deleteDeck } from "../utils/api";
+import { readDeck, deleteDeck, deleteCard } from "../utils/api";
 import { BASE_URL } from "../utils/globals";
 
 function Deck() {
+  const mountedRef = useRef(false);
   const { deckId } = useParams();
   const navigate = useNavigate();
-  const [deck, setDeck] = useState(null);
+  const [deck, setDeck] = useState({ name: 'loading...', cards: [] });
 
   useEffect(() => {
-    const fetchDeck = async () => {
-      const deck = await readDeck(deckId);
-      setDeck(deck);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    async function fetchDeck() {
+      try {
+        const response = await readDeck(deckId, abortController.signal);
+        if (mountedRef.current) {
+          setDeck(() => ({ ...response }));
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          throw error;
+        }
+      }
     };
     fetchDeck();
+    return () => { abortController.abort(); }
   }, [deckId]);
 
-  const handleDeleteDeck = async () => {
+  const handleDeleteDeck = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this deck?"
     );
     if (confirmed) {
-      await deleteDeck(deckId);
+      await deleteDeck(id);
       navigate("/");
     }
   };
@@ -32,9 +50,7 @@ function Deck() {
 
     try {
       const baseUrl ="http://localhost:8080";
-      const response = await fetch(`${baseUrl}/cards/${cardId}`, {
-        method: 'DELETE'
-      })
+      const response = await deleteCard(cardId)
       if (response.ok) {
         const newCards = deck.cards.filter((card) => card.id === cardId)
         setDeck({
@@ -81,7 +97,7 @@ function Deck() {
           </button>
           <button
             className="mr-2 mb-2 btn btn-danger"
-            onClick={handleDeleteDeck}
+            onClick={() => handleDeleteDeck(deck.id)}
           >
             Delete Deck
           </button>
