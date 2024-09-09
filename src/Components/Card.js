@@ -1,14 +1,12 @@
 import React from "react";
 
 function Card({ card, deckId, navigate, deleteCardHandler }) {
-  // Check if the card has the necessary data before rendering
   if (!card || !card.id || !card.front || !card.back) {
-    return null; // Return nothing if the card data is incomplete
+    return null; 
   }
 
   return (
     <div key={card.id} style={{ margin: "5px", border: "1px solid black", padding: "10px", position: "relative" }}>
-      {/* Legend title at the top-right */}
       <div
         style={{
           position: "absolute",
@@ -17,7 +15,7 @@ function Card({ card, deckId, navigate, deleteCardHandler }) {
           backgroundColor: "white",
           padding: "0 5px",
           fontSize: "12px",
-          color: "black",
+          color: "grey",
         }}
       >
         Card # {card.id}
@@ -29,13 +27,13 @@ function Card({ card, deckId, navigate, deleteCardHandler }) {
         {card.back}
       </p>
       <button
-        className="btn btn-primary"
+        className="btn-lg btn-primary"
         style={{ marginRight: "10px" }}
         onClick={() => navigate(`/decks/${deckId}/cards/${card.id}/edit`)}
       >
         Edit
       </button>
-      <button className="btn btn-danger" onClick={() => deleteCardHandler(card.id)}>
+      <button className="btn-lg btn-danger" onClick={() => deleteCardHandler(card.id)}>
         Delete
       </button>
     </div>
