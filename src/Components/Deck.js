@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { readDeck, deleteDeck, deleteCard } from "../utils/api";
+import Card from "./Card";
 
 function Deck() {
   const { deckId } = useParams();
@@ -39,25 +40,24 @@ function Deck() {
     }
   };
 
+  // Ensure cards exist and are valid before rendering
+  if (!cards || !cards.length) {
+    return <div>No cards found</div>;
+  }
+
   return (
-    <div>
-      {/* Logic for rendering deck details */}
+    <div className="card p-3">
       <h2>{deck.name}</h2>
       <p>{deck.description}</p>
-      
-      {/* Buttons for Edit, Study, Add, and Delete */}
-      {/* Card rendering logic */}
+
       {cards.map((card) => (
-        <div key={card.id}>
-          <p>{card.front}</p>
-          <p>{card.back}</p>
-          <button onClick={() => navigate(`/decks/${deckId}/cards/${card.id}/edit`)}>
-            Edit
-          </button>
-          <button onClick={() => deleteCardHandler(card.id)}>
-            Delete
-          </button>
-        </div>
+        <Card
+          key={card.id}
+          card={card}
+          deckId={deckId}
+          navigate={navigate}
+          deleteCardHandler={deleteCardHandler}
+        />
       ))}
     </div>
   );

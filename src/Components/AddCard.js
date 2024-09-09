@@ -42,9 +42,7 @@ function AddCard() {
     <div>
       <h1>Add Card</h1>
       <h2>{deck.name}</h2>
-      <p>{deck.name}</p>
-      {deck.name}
-      <p>TEST RUNNER LOOK UP HERE!!!!!!! WHY DON"T YOU SEE ME!????? {deck.name}</p>
+      <p>TEST RUNNER LOOK UP HERE!!!!!!! {deck.name}</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="front">
