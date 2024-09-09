@@ -18,14 +18,16 @@ function CreateDeck() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = {
-      name: name,
-      description: description,
-    };
-
-    const newDeck = await createDeck(formData);
-    navigate(`/decks/${newDeck.id}`);
-  }
+    const formData = { name, description };
+  
+    try {
+      const newDeck = await createDeck(formData);
+      navigate(`/decks/${newDeck.id}`);
+    } catch (error) {
+      console.error("Error creating deck:", error);
+    }
+  };
+  
 
   const handleCancel = () => {
     navigate("/")

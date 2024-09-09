@@ -1,133 +1,64 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { readDeck, deleteDeck, deleteCard } from "../utils/api";
-import { BASE_URL } from "../utils/globals";
 
 function Deck() {
-  const mountedRef = useRef(false);
   const { deckId } = useParams();
+  const [deck, setDeck] = useState({});
+  const [cards, setCards] = useState([]);
   const navigate = useNavigate();
-  const [deck, setDeck] = useState({ name: 'loading...', cards: [] });
 
   useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    async function fetchDeck() {
+    async function loadDeck() {
+      const abortController = new AbortController();
       try {
-        const response = await readDeck(deckId, abortController.signal);
-        if (mountedRef.current) {
-          setDeck(() => ({ ...response }));
-        }
+        const deckResponse = await readDeck(deckId, abortController.signal);
+        setDeck(deckResponse);
+        setCards(deckResponse.cards || []);
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          throw error;
-        }
+        console.error("Error loading deck", error);
       }
-    };
-    fetchDeck();
-    return () => { abortController.abort(); }
+      return () => abortController.abort();
+    }
+    loadDeck();
   }, [deckId]);
 
-  const handleDeleteDeck = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this deck?"
-    );
+  const deleteDeckHandler = async () => {
+    const confirmed = window.confirm("Delete this deck?");
     if (confirmed) {
-      await deleteDeck(id);
+      await deleteDeck(deckId);
       navigate("/");
     }
   };
 
-  const handleDeleteCard = async (cardId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this card?")
-    if (!confirmed) return 
-
-    try {
-      const baseUrl ="http://localhost:8080";
-      const response = await deleteCard(cardId)
-      if (response.ok) {
-        const newCards = deck.cards.filter((card) => card.id === cardId)
-        setDeck({
-          ...deck,
-          cards: newCards
-        })
-
-      } else {
-        console.log("The API call failed dude!")
-      }
-    } catch (error) {
-      console.log(`ERROR ${error} whoops`)
+  const deleteCardHandler = async (cardId) => {
+    const confirmed = window.confirm("Delete this card?");
+    if (confirmed) {
+      await deleteCard(cardId);
+      setCards(cards.filter(card => card.id !== cardId));
     }
-  }
-
-  if (!deck) return <div>Loading...</div>;
+  };
 
   return (
     <div>
-      <div className="card mb-4">
-        <div className="card-body">
-          <h5>{deck.name}</h5>
-          <p>HELLO TEST RUNNER THE DECK NAME IS HERE ^^^^^^^^</p>
-          <p>{deck.description}</p>
-        </div>
-        <div className="buttons">
-          <button
-            className="mr-2 mb-2 ml-2 btn btn-primary"
-            onClick={() => navigate(`/decks/${deckId}/edit`)}
-          >
-            Edit Deck
+      {/* Logic for rendering deck details */}
+      <h2>{deck.name}</h2>
+      <p>{deck.description}</p>
+      
+      {/* Buttons for Edit, Study, Add, and Delete */}
+      {/* Card rendering logic */}
+      {cards.map((card) => (
+        <div key={card.id}>
+          <p>{card.front}</p>
+          <p>{card.back}</p>
+          <button onClick={() => navigate(`/decks/${deckId}/cards/${card.id}/edit`)}>
+            Edit
           </button>
-          <button
-            className="mr-2 mb-2 btn btn-secondary"
-            onClick={() => navigate(`/decks/${deckId}/study`)}
-          >
-            Study
-          </button>
-          <button
-            className="mr-2 mb-2 btn btn-success"
-            onClick={() => navigate(`/decks/${deckId}/cards/new`)}
-          >
-            Add Cards
-          </button>
-          <button
-            className="mr-2 mb-2 btn btn-danger"
-            onClick={() => handleDeleteDeck(deck.id)}
-          >
-            Delete Deck
+          <button onClick={() => deleteCardHandler(card.id)}>
+            Delete
           </button>
         </div>
-      </div>
-      <div>
-        <h3>Cards</h3>
-        {deck.cards.map((card) => (
-          <div className="card mb-2" key={card.id}>
-            <div className="card-body">
-              <p>{card.front}</p>
-              <p>{card.back}</p>
-              <button
-                className="btn btn-primary mr-2"
-                onClick={() =>
-                  navigate(`/decks/${deckId}/cards/${card.id}/edit`)
-                }
-              >
-                Edit
-              </button>
-              <button
-                className="btn btn-danger mr-2"
-                onClick={() => handleDeleteCard(card.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   );
 }

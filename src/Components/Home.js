@@ -20,27 +20,18 @@ function Home() {
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Are you sure you want to delete this deck?");
     if (!confirmed) return;
-
-    console.log(id);
-    const newDecks = decks.filter(deck => { 
-        return deck.id !== id 
-    })
-
-    let message = "deck size did not change";
-    if (newDecks.length < decks.length) {
-        const baseUrl ="http://localhost:8080";
-//         const response = await fetch(`${baseUrl}/decks/${id}`, {method: 'DELETE'});
-      const response = await deleteDeck()
-        if (response.ok) {
-            setDecks(newDecks);
-          navigate("/")
-        } else {
-            message = "API call failed"
-        }
-    } else {
-        console.log(`Something went wrong with the delete handler function! ... ${message}`);
+  
+    const newDecks = decks.filter(deck => deck.id !== id);
+    
+    try {
+      await deleteDeck(id); // No need to check response.ok as fetchJson handles errors.
+      setDecks(newDecks);
+      console.log('DECK DELETED');
+    } catch (error) {
+      console.error("Failed to delete the deck:", error);
     }
-  }
+  };
+  
   
   useEffect(() => {
     console.log(`Updated decks: ${JSON.stringify(decks)}`);

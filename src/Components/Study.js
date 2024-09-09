@@ -74,7 +74,7 @@ function Study() {
     }
   };
 
-  if (deck.cards.length <= 2) {
+  if (!deck.cards || deck.cards.length <= 2) {
     return (
       <div>
         <h1>{deck.name}</h1>
@@ -94,8 +94,9 @@ function Study() {
       </div>
     );
   }
-
-  const card = deck.cards[currentIndex];
+  
+  const card = deck.cards[currentIndex] || { front: "No front content", back: "No back content" };
+  
 
   return (
     <div>
