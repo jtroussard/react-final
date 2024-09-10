@@ -43,7 +43,7 @@ const FormComponent = ({ formData, onChange, onSubmit, onCancel }) => {
       </div>
       <div className="d-flex justify-content-between mt-4">
         <button type="submit" className="btn btn-primary px-4">Submit</button>
-        <button type="button" className="btn btn-secondary px-4" onClick={onCancel}>Cancel</button>
+        <button type="button" className="btn btn-secondary px-4" onClick={onCancel}>Done</button>
       </div>
     </form>
   );
