@@ -7,8 +7,8 @@ import { deleteDeck, listDecks } from '../utils/api/index.js';
 function Home() {
   const mountedRef = useRef(false);
   const [decks, setDecks] = useState([]);
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     mountedRef.current = true;
@@ -20,9 +20,9 @@ function Home() {
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Are you sure you want to delete this deck?");
     if (!confirmed) return;
-  
+
     const newDecks = decks.filter(deck => deck.id !== id);
-    
+
     try {
       await deleteDeck(id); // No need to check response.ok as fetchJson handles errors.
       setDecks(newDecks);
@@ -31,13 +31,13 @@ function Home() {
       console.error("Failed to delete the deck:", error);
     }
   };
-  
-  
+
+
   useEffect(() => {
     console.log(`Updated decks: ${JSON.stringify(decks)}`);
   }, [decks]);
 
-    useEffect(() => {
+  useEffect(() => {
     const abortController = new AbortController();
     async function loadDecks() {
       try {
@@ -58,7 +58,7 @@ function Home() {
 
   const deckRenderings = () => {
     console.log(`deckRenderings controller? ${decks.length}`);
-    if (decks.length == 0) {
+    if (decks.length === 0) {
       return <span>Sorry there are no decks here.</span>;
     }
 
@@ -74,9 +74,21 @@ function Home() {
             </div>
             <p className="card-text">{deck.description}</p>
             <div className="d-flex">
-              <button className="btn btn-primary mr-2" onClick={() => navigate(`/decks/${deck.id}/study`)}>Study</button>
-              <button className="btn btn-success" onClick={() => navigate(`/decks/${deck.id}/edit`)}>Edit</button>
-              <button className="btn btn-danger ml-auto" onClick={() => handleDelete(deck.id)}>Delete</button>
+              <button className="btn btn-primary d-flex align-items-center mr-2" onClick={() => navigate(`/decks/${deck.id}`)}>
+                <span className="material-icons mr-2">visibility</span> View
+              </button>
+
+              <button className="btn btn-primary d-flex align-items-center mr-2" onClick={() => navigate(`/decks/${deck.id}/study`)}>
+                <span className="material-icons mr-2">school</span> Study
+              </button>
+
+              <button className="btn btn-success d-flex align-items-center mr-2" onClick={() => navigate(`/decks/${deck.id}/edit`)}>
+                <span className="material-icons mr-2">edit</span> Edit
+              </button>
+
+              <button className="btn btn-danger d-flex align-items-center ml-auto" onClick={() => handleDelete(deck.id)}>
+                <span className="material-icons mr-2">delete</span> Delete
+              </button>
             </div>
           </div>
         </div>
@@ -90,10 +102,10 @@ function Home() {
   }
 
   return (
-  <div>
-    <button onClick={goToCreateDeck} className="btn btn-secondary mb-2">Create Deck</button>
-    {deckRenderings()}
-  </div>
+    <div>
+      <button onClick={goToCreateDeck} className="btn btn-secondary mb-2">Create Deck</button>
+      {deckRenderings()}
+    </div>
   );
 }
 

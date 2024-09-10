@@ -1,6 +1,6 @@
 import React from "react";
 
-function Card({ card, deckId, navigate, deleteCardHandler }) {
+function Card({ card, deckId, navigate, deleteCardHandler, deck }) {
   if (!card || !card.id || !card.front || !card.back) {
     return null; 
   }

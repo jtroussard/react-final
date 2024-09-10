@@ -48,15 +48,17 @@ function Layout() {
         {breadcrumbRenderings()}
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/decks" element={<Home />} />
           <Route path="/decks/new" element={<CreateDeck />} />
+          <Route path="/decks/:deckId/cards/new" element={<AddCard />} />
+          <Route path="/decks/:deckId/cards/:cardId/edit" element={<EditCard />} /> 
+          <Route path="/decks/:deckId/edit" element={<EditDeck />} />
           <Route path="/decks/:deckId/study" element={<Study />} />
           <Route path="/decks/:deckId" element={<Deck />} />
-          <Route path="/decks/:deckId/edit" element={<EditDeck />} />
-          <Route path="/decks/:deckId/cards/new" element={<AddCard />} />
-          <Route
-            path="/decks/:deckId/cards/:cardId/edit"
-            element={<EditCard />}
-          />
+          <Route path="/decks/:deckId/cards" element={<Deck />} />
+          
+          
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
