@@ -64,15 +64,7 @@ function Deck() {
       <h2>{deck.name}</h2>
       <p>{deck.description}</p>
 
-      <div className="d-flex justify-content-start mb-3">
-        <button className="btn btn-success d-flex align-items-center mr-2" onClick={() => navigate(`/decks/${deck.id}/cards/new`)}>
-          <span className="material-icons mr-2">add</span> Add Card
-        </button>
-
-        <button className="btn btn-danger d-flex align-items-center" onClick={() => navigate('/')}>
-          <span className="material-icons mr-2">cancel</span> Cancel
-        </button>
-      </div>
+      {controls}
 
 
       {cards.map((card) => (
