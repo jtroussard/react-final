@@ -21,6 +21,7 @@ This is a flashcard study web application built with **React**. The app allows u
 
 ## Structure
 
+```bash
 src
 ├── App.css
 ├── App.js
@@ -51,7 +52,7 @@ src
     ├── class-names
     │   └── index.js
     └── globals.js
-
+```
 
 ## How to Run the Project
 
